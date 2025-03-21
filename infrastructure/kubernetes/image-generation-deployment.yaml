@@ -1,0 +1,91 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: image-generation
+  namespace: storyverse
+  labels:
+    app: image-generation
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: image-generation
+  template:
+    metadata:
+      labels:
+        app: image-generation
+    spec:
+      containers:
+      - name: image-generation
+        image: storyverse/image-generation:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080
+        - containerPort: 8000  # Prometheus metrics
+        resources:
+          requests:
+            cpu: 1
+            memory: 4Gi
+            nvidia.com/gpu: 1
+          limits:
+            cpu: 2
+            memory: 8Gi
+            nvidia.com/gpu: 1
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 60  # Longer delay for GPU initialization
+          periodSeconds: 20
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 20
+        volumeMounts:
+        - name: models-volume
+          mountPath: /app/ComfyUI/models
+      volumes:
+      - name: models-volume
+        persistentVolumeClaim:
+          claimName: models-pvc
+      nodeSelector:
+        accelerator: nvidia
+      topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: topology.kubernetes.io/zone
+        whenUnsatisfiable: ScheduleAnyway
+        labelSelector:
+          matchLabels:
+            app: image-generation
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: image-generation
+  namespace: storyverse
+spec:
+  selector:
+    app: image-generation
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080
+  - name: metrics
+    port: 8000
+    targetPort: 8000
+  type: ClusterIP
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: models-pvc
+  namespace: storyverse
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+  storageClassName: gp2

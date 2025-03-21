@@ -1,0 +1,289 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: universe-management
+  namespace: storyverse
+  labels:
+    app: universe-management
+    tier: core-story-generation
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: universe-management
+  template:
+    metadata:
+      labels:
+        app: universe-management
+        tier: core-story-generation
+    spec:
+      containers:
+      - name: universe-management
+        image: storyverse/universe-management:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080
+        env:
+        - name: MONGODB_URI
+          valueFrom:
+            secretKeyRef:
+              name: mongodb-credentials
+              key: uri
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: universe-management
+  namespace: storyverse
+spec:
+  selector:
+    app: universe-management
+  ports:
+  - port: 8080
+    targetPort: 8080
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: character-database
+  namespace: storyverse
+  labels:
+    app: character-database
+    tier: core-story-generation
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: character-database
+  template:
+    metadata:
+      labels:
+        app: character-database
+        tier: core-story-generation
+    spec:
+      containers:
+      - name: character-database
+        image: storyverse/character-database:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080
+        env:
+        - name: MONGODB_URI
+          valueFrom:
+            secretKeyRef:
+              name: mongodb-credentials
+              key: uri
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: character-database
+  namespace: storyverse
+spec:
+  selector:
+    app: character-database
+  ports:
+  - port: 8080
+    targetPort: 8080
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: plot-generation
+  namespace: storyverse
+  labels:
+    app: plot-generation
+    tier: core-story-generation
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: plot-generation
+  template:
+    metadata:
+      labels:
+        app: plot-generation
+        tier: core-story-generation
+    spec:
+      containers:
+      - name: plot-generation
+        image: storyverse/plot-generation:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080
+        env:
+        - name: MONGODB_URI
+          valueFrom:
+            secretKeyRef:
+              name: mongodb-credentials
+              key: uri
+        resources:
+          requests:
+            cpu: 200m
+            memory: 512Mi
+          limits:
+            cpu: 1000m
+            memory: 1Gi
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: plot-generation
+  namespace: storyverse
+spec:
+  selector:
+    app: plot-generation
+  ports:
+  - port: 8080
+    targetPort: 8080
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: moral-lesson
+  namespace: storyverse
+  labels:
+    app: moral-lesson
+    tier: core-story-generation
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: moral-lesson
+  template:
+    metadata:
+      labels:
+        app: moral-lesson
+        tier: core-story-generation
+    spec:
+      containers:
+      - name: moral-lesson
+        image: storyverse/moral-lesson:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080
+        env:
+        - name: MONGODB_URI
+          valueFrom:
+            secretKeyRef:
+              name: mongodb-credentials
+              key: uri
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 300m
+            memory: 512Mi
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: moral-lesson
+  namespace: storyverse
+spec:
+  selector:
+    app: moral-lesson
+  ports:
+  - port: 8080
+    targetPort: 8080
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: crossover-logic
+  namespace: storyverse
+  labels:
+    app: crossover-logic
+    tier: core-story-generation
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: crossover-logic
+  template:
+    metadata:
+      labels:
+        app: crossover-logic
+        tier: core-story-generation
+    spec:
+      containers:
+      - name: crossover-logic
+        image: storyverse/crossover-logic:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080
+        env:
+        - name: MONGODB_URI
+          valueFrom:
+            secretKeyRef:
+              name: mongodb-credentials
+              key: uri
+        resources:
+          requests:
+            cpu: 200m
+            memory: 256Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: crossover-logic
+  namespace: storyverse
+spec:
+  selector:
+    app: crossover-logic
+  ports:
+  - port: 8080
+    targetPort: 8080
+  type: ClusterIP

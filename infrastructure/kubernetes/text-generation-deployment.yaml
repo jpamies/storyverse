@@ -1,0 +1,82 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: text-generation
+  namespace: storyverse
+  labels:
+    app: text-generation
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: text-generation
+  template:
+    metadata:
+      labels:
+        app: text-generation
+    spec:
+      containers:
+      - name: text-generation
+        image: storyverse/text-generation:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080
+        - containerPort: 8000  # Prometheus metrics
+        env:
+        - name: ANTHROPIC_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: api-keys
+              key: anthropic-api-key
+        resources:
+          requests:
+            cpu: 500m
+            memory: 1Gi
+          limits:
+            cpu: 1
+            memory: 2Gi
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 5
+      topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: topology.kubernetes.io/zone
+        whenUnsatisfiable: ScheduleAnyway
+        labelSelector:
+          matchLabels:
+            app: text-generation
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: text-generation
+  namespace: storyverse
+spec:
+  selector:
+    app: text-generation
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080
+  - name: metrics
+    port: 8000
+    targetPort: 8000
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: api-keys
+  namespace: storyverse
+type: Opaque
+data:
+  anthropic-api-key: BASE64_ENCODED_API_KEY_HERE  # Replace with actual base64 encoded key

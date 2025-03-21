@@ -1,0 +1,31 @@
+{
+  "name": "storyverse-media-asset",
+  "version": "0.1.0",
+  "description": "Media Asset Service for StoryVerse",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "test": "jest",
+    "docker:build": "docker build -t storyverse/media-asset:latest ."
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "helmet": "^7.0.0",
+    "morgan": "^1.10.0",
+    "winston": "^3.8.2",
+    "prom-client": "^14.2.0",
+    "dotenv": "^16.0.3",
+    "aws-sdk": "^2.1386.0",
+    "multer": "^1.4.5-lts.1",
+    "sharp": "^0.32.1",
+    "uuid": "^9.0.0",
+    "joi": "^17.9.2"
+  },
+  "devDependencies": {
+    "jest": "^29.5.0",
+    "nodemon": "^2.0.22",
+    "supertest": "^6.3.3"
+  }
+}

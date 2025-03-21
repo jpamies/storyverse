@@ -1,0 +1,198 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: usage-analytics
+  namespace: storyverse
+  labels:
+    app: usage-analytics
+    tier: analytics-recommendation
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: usage-analytics
+  template:
+    metadata:
+      labels:
+        app: usage-analytics
+        tier: analytics-recommendation
+    spec:
+      containers:
+      - name: usage-analytics
+        image: storyverse/usage-analytics:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080
+        env:
+        - name: MONGODB_URI
+          valueFrom:
+            secretKeyRef:
+              name: mongodb-credentials
+              key: uri
+        resources:
+          requests:
+            cpu: 200m
+            memory: 512Mi
+          limits:
+            cpu: 500m
+            memory: 1Gi
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 10
+      topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: topology.kubernetes.io/zone
+        whenUnsatisfiable: ScheduleAnyway
+        labelSelector:
+          matchLabels:
+            app: usage-analytics
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: usage-analytics
+  namespace: storyverse
+spec:
+  selector:
+    app: usage-analytics
+  ports:
+  - port: 8080
+    targetPort: 8080
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: recommendation-engine
+  namespace: storyverse
+  labels:
+    app: recommendation-engine
+    tier: analytics-recommendation
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: recommendation-engine
+  template:
+    metadata:
+      labels:
+        app: recommendation-engine
+        tier: analytics-recommendation
+    spec:
+      containers:
+      - name: recommendation-engine
+        image: storyverse/recommendation-engine:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080
+        env:
+        - name: MONGODB_URI
+          valueFrom:
+            secretKeyRef:
+              name: mongodb-credentials
+              key: uri
+        - name: USAGE_ANALYTICS_URL
+          value: "http://usage-analytics:8080"
+        resources:
+          requests:
+            cpu: 500m
+            memory: 1Gi
+          limits:
+            cpu: 1000m
+            memory: 2Gi
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 15
+      topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: topology.kubernetes.io/zone
+        whenUnsatisfiable: ScheduleAnyway
+        labelSelector:
+          matchLabels:
+            app: recommendation-engine
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: recommendation-engine
+  namespace: storyverse
+spec:
+  selector:
+    app: recommendation-engine
+  ports:
+  - port: 8080
+    targetPort: 8080
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: feedback-processing
+  namespace: storyverse
+  labels:
+    app: feedback-processing
+    tier: analytics-recommendation
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: feedback-processing
+  template:
+    metadata:
+      labels:
+        app: feedback-processing
+        tier: analytics-recommendation
+    spec:
+      containers:
+      - name: feedback-processing
+        image: storyverse/feedback-processing:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080
+        env:
+        - name: MONGODB_URI
+          valueFrom:
+            secretKeyRef:
+              name: mongodb-credentials
+              key: uri
+        - name: USAGE_ANALYTICS_URL
+          value: "http://usage-analytics:8080"
+        resources:
+          requests:
+            cpu: 200m
+            memory: 512Mi
+          limits:
+            cpu: 500m
+            memory: 1Gi
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 10
+      topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: topology.kubernetes.io/zone
+        whenUnsatisfiable: ScheduleAnyway
+        labelSelector:
+          matchLabels:
+            app: feedback-processing
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: feedback-processing
+  namespace: storyverse
+spec:
+  selector:
+    app: feedback-processing
+  ports:
+  - port: 8080
+    targetPort: 8080
+  type: ClusterIP

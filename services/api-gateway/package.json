@@ -1,0 +1,32 @@
+{
+  "name": "storyverse-api-gateway",
+  "version": "0.1.0",
+  "description": "API Gateway for StoryVerse - Custom Tales for Kids",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "test": "jest",
+    "docker:build": "docker build -t storyverse/api-gateway:latest ."
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "express-rate-limit": "^6.7.0",
+    "cors": "^2.8.5",
+    "helmet": "^7.0.0",
+    "morgan": "^1.10.0",
+    "winston": "^3.8.2",
+    "axios": "^1.4.0",
+    "jsonwebtoken": "^9.0.0",
+    "express-jwt": "^8.4.1",
+    "http-proxy-middleware": "^2.0.6",
+    "cookie-parser": "^1.4.6",
+    "compression": "^1.7.4",
+    "express-validator": "^7.0.1"
+  },
+  "devDependencies": {
+    "jest": "^29.5.0",
+    "nodemon": "^2.0.22",
+    "supertest": "^6.3.3"
+  }
+}

@@ -1,0 +1,338 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: text-generation
+  namespace: storyverse
+  labels:
+    app: text-generation
+    tier: content-generation
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: text-generation
+  template:
+    metadata:
+      labels:
+        app: text-generation
+        tier: content-generation
+    spec:
+      containers:
+      - name: text-generation
+        image: storyverse/text-generation:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080
+        env:
+        - name: MONGODB_URI
+          valueFrom:
+            secretKeyRef:
+              name: mongodb-credentials
+              key: uri
+        resources:
+          requests:
+            cpu: 500m
+            memory: 1Gi
+          limits:
+            cpu: 2000m
+            memory: 4Gi
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 15
+      topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: topology.kubernetes.io/zone
+        whenUnsatisfiable: ScheduleAnyway
+        labelSelector:
+          matchLabels:
+            app: text-generation
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: text-generation
+  namespace: storyverse
+spec:
+  selector:
+    app: text-generation
+  ports:
+  - port: 8080
+    targetPort: 8080
+  type: ClusterIP
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: text-generation
+  namespace: storyverse
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: text-generation
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300
+    scaleUp:
+      stabilizationWindowSeconds: 60
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: image-generation
+  namespace: storyverse
+  labels:
+    app: image-generation
+    tier: content-generation
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: image-generation
+  template:
+    metadata:
+      labels:
+        app: image-generation
+        tier: content-generation
+    spec:
+      containers:
+      - name: image-generation
+        image: storyverse/image-generation:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080
+        env:
+        - name: MONGODB_URI
+          valueFrom:
+            secretKeyRef:
+              name: mongodb-credentials
+              key: uri
+        resources:
+          requests:
+            cpu: 1000m
+            memory: 2Gi
+            nvidia.com/gpu: 1
+          limits:
+            cpu: 4000m
+            memory: 8Gi
+            nvidia.com/gpu: 1
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 30
+      nodeSelector:
+        accelerator: nvidia-gpu
+      topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: topology.kubernetes.io/zone
+        whenUnsatisfiable: ScheduleAnyway
+        labelSelector:
+          matchLabels:
+            app: image-generation
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: image-generation
+  namespace: storyverse
+spec:
+  selector:
+    app: image-generation
+  ports:
+  - port: 8080
+    targetPort: 8080
+  type: ClusterIP
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: image-generation
+  namespace: storyverse
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: image-generation
+  minReplicas: 2
+  maxReplicas: 6
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 60
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 600
+    scaleUp:
+      stabilizationWindowSeconds: 120
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: audio-narration
+  namespace: storyverse
+  labels:
+    app: audio-narration
+    tier: content-generation
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: audio-narration
+  template:
+    metadata:
+      labels:
+        app: audio-narration
+        tier: content-generation
+    spec:
+      containers:
+      - name: audio-narration
+        image: storyverse/audio-narration:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080
+        env:
+        - name: MONGODB_URI
+          valueFrom:
+            secretKeyRef:
+              name: mongodb-credentials
+              key: uri
+        resources:
+          requests:
+            cpu: 500m
+            memory: 1Gi
+          limits:
+            cpu: 2000m
+            memory: 4Gi
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 15
+      topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: topology.kubernetes.io/zone
+        whenUnsatisfiable: ScheduleAnyway
+        labelSelector:
+          matchLabels:
+            app: audio-narration
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: audio-narration
+  namespace: storyverse
+spec:
+  selector:
+    app: audio-narration
+  ports:
+  - port: 8080
+    targetPort: 8080
+  type: ClusterIP
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: audio-narration
+  namespace: storyverse
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: audio-narration
+  minReplicas: 2
+  maxReplicas: 8
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300
+    scaleUp:
+      stabilizationWindowSeconds: 60
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: content-moderation
+  namespace: storyverse
+  labels:
+    app: content-moderation
+    tier: content-generation
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: content-moderation
+  template:
+    metadata:
+      labels:
+        app: content-moderation
+        tier: content-generation
+    spec:
+      containers:
+      - name: content-moderation
+        image: storyverse/content-moderation:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080
+        env:
+        - name: MONGODB_URI
+          valueFrom:
+            secretKeyRef:
+              name: mongodb-credentials
+              key: uri
+        resources:
+          requests:
+            cpu: 300m
+            memory: 512Mi
+          limits:
+            cpu: 1000m
+            memory: 1Gi
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 10
+      topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: topology.kubernetes.io/zone
+        whenUnsatisfiable: ScheduleAnyway
+        labelSelector:
+          matchLabels:
+            app: content-moderation
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: content-moderation
+  namespace: storyverse
+spec:
+  selector:
+    app: content-moderation
+  ports:
+  - port: 8080
+    targetPort: 8080
+  type: ClusterIP

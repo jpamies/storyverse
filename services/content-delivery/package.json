@@ -1,0 +1,33 @@
+{
+  "name": "storyverse-content-delivery",
+  "version": "0.1.0",
+  "description": "Content Delivery Service for StoryVerse",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "test": "jest",
+    "docker:build": "docker build -t storyverse/content-delivery:latest ."
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "helmet": "^7.0.0",
+    "morgan": "^1.10.0",
+    "winston": "^3.8.2",
+    "prom-client": "^14.2.0",
+    "dotenv": "^16.0.3",
+    "aws-sdk": "^2.1386.0",
+    "redis": "^4.6.6",
+    "pdfkit": "^0.13.0",
+    "archiver": "^5.3.1",
+    "uuid": "^9.0.0",
+    "joi": "^17.9.2",
+    "node-fetch": "^2.6.9"
+  },
+  "devDependencies": {
+    "jest": "^29.5.0",
+    "nodemon": "^2.0.22",
+    "supertest": "^6.3.3"
+  }
+}

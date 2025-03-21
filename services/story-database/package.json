@@ -1,0 +1,30 @@
+{
+  "name": "storyverse-story-database",
+  "version": "0.1.0",
+  "description": "Story Database Service for StoryVerse",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "test": "jest",
+    "docker:build": "docker build -t storyverse/story-database:latest ."
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "helmet": "^7.0.0",
+    "morgan": "^1.10.0",
+    "winston": "^3.8.2",
+    "mongoose": "^7.2.1",
+    "prom-client": "^14.2.0",
+    "dotenv": "^16.0.3",
+    "joi": "^17.9.2",
+    "aws-sdk": "^2.1386.0",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "jest": "^29.5.0",
+    "nodemon": "^2.0.22",
+    "supertest": "^6.3.3"
+  }
+}
