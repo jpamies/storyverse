@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
       - name: text-generation
-        image: storyverse/text-generation:latest
+        image: public.ecr.aws/j0rd1/demo/storyverse/text-generation:latest
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8080
@@ -109,7 +109,7 @@ spec:
     spec:
       containers:
       - name: image-generation
-        image: storyverse/image-generation:latest
+        image: public.ecr.aws/j0rd1/demo/storyverse/image-generation:latest
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8080
@@ -203,7 +203,7 @@ spec:
     spec:
       containers:
       - name: audio-narration
-        image: storyverse/audio-narration:latest
+        image: public.ecr.aws/j0rd1/demo/storyverse/audio-narration:latest
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8080
@@ -293,7 +293,7 @@ spec:
     spec:
       containers:
       - name: content-moderation
-        image: storyverse/content-moderation:latest
+        image: public.ecr.aws/j0rd1/demo/storyverse/content-moderation:latest
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8080

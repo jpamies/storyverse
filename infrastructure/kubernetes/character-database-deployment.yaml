@@ -28,7 +28,7 @@ spec:
     spec:
       containers:
       - name: character-database
-        image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/storyverse/character-database:latest
+        image: public.ecr.aws/j0rd1/demo/storyverse/character-database:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 8080

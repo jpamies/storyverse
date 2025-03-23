@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
       - name: usage-analytics
-        image: storyverse/usage-analytics:latest
+        image: public.ecr.aws/j0rd1/demo/storyverse/usage-analytics:latest
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8080
@@ -84,7 +84,7 @@ spec:
     spec:
       containers:
       - name: recommendation-engine
-        image: storyverse/recommendation-engine:latest
+        image: public.ecr.aws/j0rd1/demo/storyverse/recommendation-engine:latest
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8080
@@ -151,7 +151,7 @@ spec:
     spec:
       containers:
       - name: feedback-processing
-        image: storyverse/feedback-processing:latest
+        image: public.ecr.aws/j0rd1/demo/storyverse/feedback-processing:latest
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8080

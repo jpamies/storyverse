@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
       - name: story-database
-        image: storyverse/story-database:latest
+        image: public.ecr.aws/j0rd1/demo/storyverse/story-database:latest
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8080
@@ -84,7 +84,7 @@ spec:
     spec:
       containers:
       - name: media-asset
-        image: storyverse/media-asset:latest
+        image: public.ecr.aws/j0rd1/demo/storyverse/media-asset:latest
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8080
@@ -151,7 +151,7 @@ spec:
     spec:
       containers:
       - name: content-delivery
-        image: storyverse/content-delivery:latest
+        image: public.ecr.aws/j0rd1/demo/storyverse/content-delivery:latest
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8080

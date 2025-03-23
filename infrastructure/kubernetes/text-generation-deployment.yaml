@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: text-generation
-        image: storyverse/text-generation:latest
+        image: public.ecr.aws/j0rd1/demo/storyverse/text-generation:latest
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8080

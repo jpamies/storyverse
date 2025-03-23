@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: storyverse/frontend:latest
+        image: public.ecr.aws/j0rd1/demo/storyverse/frontend:latest
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 80

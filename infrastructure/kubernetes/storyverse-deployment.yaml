@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
       - name: universe-management
-        image: storyverse/universe-management:latest
+        image: public.ecr.aws/j0rd1/demo/storyverse/universe-management:latest
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8080
@@ -77,7 +77,7 @@ spec:
     spec:
       containers:
       - name: character-database
-        image: storyverse/character-database:latest
+        image: public.ecr.aws/j0rd1/demo/storyverse/character-database:latest
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8080
@@ -135,7 +135,7 @@ spec:
     spec:
       containers:
       - name: plot-generation
-        image: storyverse/plot-generation:latest
+        image: public.ecr.aws/j0rd1/demo/storyverse/plot-generation:latest
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8080
@@ -193,7 +193,7 @@ spec:
     spec:
       containers:
       - name: moral-lesson
-        image: storyverse/moral-lesson:latest
+        image: public.ecr.aws/j0rd1/demo/storyverse/moral-lesson:latest
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8080
@@ -251,7 +251,7 @@ spec:
     spec:
       containers:
       - name: crossover-logic
-        image: storyverse/crossover-logic:latest
+        image: public.ecr.aws/j0rd1/demo/storyverse/crossover-logic:latest
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8080
