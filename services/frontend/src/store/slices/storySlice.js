@@ -1,111 +1,108 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
-
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080/api';
-
-export const fetchStories = createAsyncThunk(
-  'story/fetchStories',
-  async (_, { rejectWithValue }) => {
-    try {
-      const response = await axios.get(`${API_URL}/stories`);
-      return response.data;
-    } catch (error) {
-      return rejectWithValue(error.response.data);
-    }
-  }
-);
-
-export const createStory = createAsyncThunk(
-  'story/createStory',
-  async (storyData, { rejectWithValue }) => {
-    try {
-      const response = await axios.post(`${API_URL}/stories`, storyData);
-      return response.data;
-    } catch (error) {
-      return rejectWithValue(error.response.data);
-    }
-  }
-);
-
-export const generatePreview = createAsyncThunk(
-  'story/generatePreview',
-  async (previewData, { rejectWithValue }) => {
-    try {
-      const response = await axios.post(`${API_URL}/preview`, previewData);
-      return response.data;
-    } catch (error) {
-      return rejectWithValue(error.response.data);
-    }
-  }
-);
+import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
-  stories: [],
-  currentStory: null,
-  preview: null,
-  status: 'idle', // 'idle' | 'loading' | 'succeeded' | 'failed'
-  error: null,
+  currentStory: {
+    universeType: '',
+    selectedUniverses: [],
+    mainCharacter: null,
+    supportingCharacters: [],
+    theme: '',
+    moral: '',
+    childName: '',
+    ageGroup: '',
+    readingLevel: '',
+    storyLength: '',
+    mediaOptions: []
+  },
+  savedStories: [],
+  generatedStory: null,
+  loading: false,
+  error: null
 };
 
 const storySlice = createSlice({
   name: 'story',
   initialState,
   reducers: {
-    setCurrentStory: (state, action) => {
-      state.currentStory = action.payload;
-    },
     updateStoryField: (state, action) => {
       const { field, value } = action.payload;
-      if (state.currentStory) {
-        state.currentStory[field] = value;
-      }
+      state.currentStory[field] = value;
     },
-    clearPreview: (state) => {
-      state.preview = null;
+    resetCurrentStory: (state) => {
+      state.currentStory = initialState.currentStory;
     },
-  },
-  extraReducers: (builder) => {
-    builder
-      // Fetch stories
-      .addCase(fetchStories.pending, (state) => {
-        state.status = 'loading';
-      })
-      .addCase(fetchStories.fulfilled, (state, action) => {
-        state.status = 'succeeded';
-        state.stories = action.payload;
-      })
-      .addCase(fetchStories.rejected, (state, action) => {
-        state.status = 'failed';
-        state.error = action.payload;
-      })
-      // Create story
-      .addCase(createStory.pending, (state) => {
-        state.status = 'loading';
-      })
-      .addCase(createStory.fulfilled, (state, action) => {
-        state.status = 'succeeded';
-        state.stories.push(action.payload);
-        state.currentStory = action.payload;
-      })
-      .addCase(createStory.rejected, (state, action) => {
-        state.status = 'failed';
-        state.error = action.payload;
-      })
-      // Generate preview
-      .addCase(generatePreview.pending, (state) => {
-        state.status = 'loading';
-      })
-      .addCase(generatePreview.fulfilled, (state, action) => {
-        state.status = 'succeeded';
-        state.preview = action.payload;
-      })
-      .addCase(generatePreview.rejected, (state, action) => {
-        state.status = 'failed';
-        state.error = action.payload;
-      });
-  },
+    generateStoryStart: (state) => {
+      state.loading = true;
+      state.error = null;
+    },
+    generateStorySuccess: (state, action) => {
+      state.loading = false;
+      state.generatedStory = action.payload;
+      state.error = null;
+    },
+    generateStoryFailure: (state, action) => {
+      state.loading = false;
+      state.error = action.payload;
+    },
+    saveStoryStart: (state) => {
+      state.loading = true;
+      state.error = null;
+    },
+    saveStorySuccess: (state, action) => {
+      state.loading = false;
+      state.savedStories.push(action.payload);
+      state.error = null;
+    },
+    saveStoryFailure: (state, action) => {
+      state.loading = false;
+      state.error = action.payload;
+    },
+    fetchStoriesStart: (state) => {
+      state.loading = true;
+      state.error = null;
+    },
+    fetchStoriesSuccess: (state, action) => {
+      state.loading = false;
+      state.savedStories = action.payload;
+      state.error = null;
+    },
+    fetchStoriesFailure: (state, action) => {
+      state.loading = false;
+      state.error = action.payload;
+    },
+    deleteStoryStart: (state) => {
+      state.loading = true;
+      state.error = null;
+    },
+    deleteStorySuccess: (state, action) => {
+      state.loading = false;
+      state.savedStories = state.savedStories.filter(
+        story => story.id !== action.payload
+      );
+      state.error = null;
+    },
+    deleteStoryFailure: (state, action) => {
+      state.loading = false;
+      state.error = action.payload;
+    }
+  }
 });
 
-export const { setCurrentStory, updateStoryField, clearPreview } = storySlice.actions;
+export const { 
+  updateStoryField,
+  resetCurrentStory,
+  generateStoryStart,
+  generateStorySuccess,
+  generateStoryFailure,
+  saveStoryStart,
+  saveStorySuccess,
+  saveStoryFailure,
+  fetchStoriesStart,
+  fetchStoriesSuccess,
+  fetchStoriesFailure,
+  deleteStoryStart,
+  deleteStorySuccess,
+  deleteStoryFailure
+} = storySlice.actions;
 
 export default storySlice.reducer;
