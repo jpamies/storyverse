@@ -1,6 +1,6 @@
 # StoryVerse: Custom Tales for Kids
 
-![StoryVerse Logo](docs/images/logo-placeholder.png)
+![StoryVerse Logo](docs/images/logo.png)
 
 ## Project Overview
 
