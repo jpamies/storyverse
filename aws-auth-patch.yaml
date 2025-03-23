@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: aws-auth
+  namespace: kube-system
+data:
+  mapRoles: |
+    - rolearn: arn:aws:iam::037495631109:role/service-role/AWSCodePipelineServiceRole-eu-south-2-storyverse
+      username: codebuild
+      groups:
+        - system:masters
