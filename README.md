@@ -153,7 +153,12 @@ cd ../kubernetes
 
 4. Access the application:
 ```bash
-kubectl get svc storyverse-frontend -n storyverse
+# Access via the Ingress (DNS needs to be configured)
+# The application will be available at http://storyverse.example.com
+
+# For local development or testing, use port-forwarding
+kubectl -n storyverse port-forward svc/frontend 8080:80
+# Then access at http://localhost:8080
 ```
 
 ## Project Structure

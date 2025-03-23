@@ -40,6 +40,13 @@ kubectl apply -f api-gateway-deployment.yaml
 echo "Deploying Frontend Layer..."
 kubectl apply -f frontend-deployment.yaml
 
+# Deploy ingress resources
+echo "Deploying ingress resources..."
+kubectl apply -f ingress/alb-ingress-class-params.yaml
+kubectl apply -f ingress/alb-ingress-class.yaml
+kubectl apply -f ingress/frontend-ingress.yaml
+kubectl apply -f ingress/api-gateway-ingress.yaml
+
 # Wait for critical services to be ready
 echo "Waiting for critical services to be ready..."
 kubectl -n storyverse wait --for=condition=available --timeout=300s deployment/api-gateway
@@ -56,8 +63,14 @@ if [ -z "$FRONTEND_URL" ]; then
 fi
 
 echo "StoryVerse deployment complete!"
-echo "Access the application at: http://$FRONTEND_URL"
-echo "API Gateway available at: http://$(kubectl -n storyverse get service api-gateway -o jsonpath='{.spec.clusterIP}'):8080"
+echo "Access the application at: http://storyverse.example.com"
+echo "API Gateway available at: http://api.storyverse.example.com"
+echo ""
+echo "LoadBalancer URL (if DNS not configured): http://$FRONTEND_URL"
+echo ""
+echo "For local development, you can use kubectl port-forward:"
+echo "kubectl -n storyverse port-forward svc/frontend 8080:80"
+echo "Then access the application at: http://localhost:8080"
 echo ""
 echo "To check the status of all deployments:"
 echo "kubectl -n storyverse get deployments"
