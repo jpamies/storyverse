@@ -1,0 +1,89 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      docker: 19
+      python: 3.9
+
+  pre_build:
+    commands:
+      - echo Logging in to Amazon ECR...
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+      - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+      - IMAGE_TAG=${COMMIT_HASH:=latest}
+      - echo Installing kubectl...
+      - curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+      - chmod +x kubectl
+      - mv kubectl /usr/local/bin/
+      - echo Updating kubeconfig for EKS cluster...
+      - aws eks update-kubeconfig --name bender --region $AWS_DEFAULT_REGION
+
+  build:
+    commands:
+      - echo Building the Frontend Docker image...
+      - cd services/frontend
+      - docker build -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/demo/storyverse/frontend:$IMAGE_TAG -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/demo/storyverse/frontend:latest .
+      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/demo/storyverse/frontend:$IMAGE_TAG
+      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/demo/storyverse/frontend:latest
+
+      - echo Building the API Gateway Docker image...
+      - cd ../api-gateway
+      - docker build -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/demo/storyverse/api-gateway:$IMAGE_TAG -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/demo/storyverse/api-gateway:latest .
+      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/demo/storyverse/api-gateway:$IMAGE_TAG
+      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/demo/storyverse/api-gateway:latest
+
+      - echo Building the Text Generation Docker image...
+      - cd ../text-generation
+      - docker build -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/demo/storyverse/text-generation:$IMAGE_TAG -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/demo/storyverse/text-generation:latest .
+      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/demo/storyverse/text-generation:$IMAGE_TAG
+      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/demo/storyverse/text-generation:latest
+
+      - echo Building the Image Generation Docker image...
+      - cd ../image-generation
+      - docker build -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/demo/storyverse/image-generation:$IMAGE_TAG -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/demo/storyverse/image-generation:latest .
+      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/demo/storyverse/image-generation:$IMAGE_TAG
+      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/demo/storyverse/image-generation:latest
+
+      - echo Building the Audio Narration Docker image...
+      - cd ../audio-narration
+      - docker build -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/demo/storyverse/audio-narration:$IMAGE_TAG -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/demo/storyverse/audio-narration:latest .
+      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/demo/storyverse/audio-narration:$IMAGE_TAG
+      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/demo/storyverse/audio-narration:latest
+
+      - echo Building the Character Database Docker image...
+      - cd ../character-database
+      - docker build -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/demo/storyverse/character-database:$IMAGE_TAG -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/demo/storyverse/character-database:latest .
+      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/demo/storyverse/character-database:$IMAGE_TAG
+      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/demo/storyverse/character-database:latest
+
+      - echo Building the Content Moderation Docker image...
+      - cd ../content-moderation
+      - docker build -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/demo/storyverse/content-moderation:$IMAGE_TAG -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/demo/storyverse/content-moderation:latest .
+      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/demo/storyverse/content-moderation:$IMAGE_TAG
+      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/demo/storyverse/content-moderation:latest
+
+      - cd ../../
+      - echo Updating Kubernetes manifests with new image tags...
+      - find ./infrastructure/kubernetes -type f -name "*.yaml" | xargs sed -i "s|public.ecr.aws/j0rd1/demo/storyverse/|$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/demo/storyverse/|g"
+      - find ./infrastructure/kubernetes -type f -name "*.yaml" | xargs sed -i "s|:latest|:$IMAGE_TAG|g"
+
+  post_build:
+    commands:
+      - echo Deploying to EKS cluster bender...
+      - kubectl create namespace storyverse || true
+      - kubectl apply -f infrastructure/kubernetes/mongodb-deployment.yaml
+      - kubectl apply -f infrastructure/kubernetes/frontend-deployment.yaml
+      - kubectl apply -f infrastructure/kubernetes/api-gateway-deployment.yaml
+      - kubectl apply -f infrastructure/kubernetes/character-database-deployment.yaml
+      - kubectl apply -f infrastructure/kubernetes/text-generation-deployment.yaml
+      - kubectl apply -f infrastructure/kubernetes/image-generation-deployment.yaml
+      - kubectl apply -f infrastructure/kubernetes/content-generation-deployment.yaml
+      - kubectl apply -f infrastructure/kubernetes/storage-delivery-deployment.yaml
+      - kubectl apply -f infrastructure/kubernetes/analytics-recommendation-deployment.yaml
+      - echo Deployment completed on `date`
+
+artifacts:
+  files:
+    - infrastructure/kubernetes/*.yaml
+    - buildspec.yml
