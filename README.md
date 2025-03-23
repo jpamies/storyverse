@@ -12,7 +12,7 @@ This project serves as a demonstration of AWS EKS AutoMode capabilities, showcas
 
 StoryVerse uses a microservices architecture deployed on Amazon EKS with AutoMode enabled:
 
-![Architecture Diagram](docs/images/architecture-placeholder.png)
+![Architecture Diagram](docs/images/architecture-diagram.svg)
 
 ### Key Components
 
